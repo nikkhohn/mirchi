@@ -1,0 +1,25 @@
+[[redirects]]
+  from = "/api/*"
+  to = "http://159.65.10.189:8651/:splat"
+  status = 200
+  force = true
+
+
+<div id="age-gate">
+  <div class="age-box">
+    <div class="age-scan-line"></div>
+    <span class="age-warning-icon">🔞</span>
+    <div class="age-title">AGE <span>VERIFICATION</span></div>
+    <div class="age-subtitle">
+      This website contains <strong>adult content</strong> intended for mature audiences only.<br/>
+      You must be <strong>18 years or older</strong> to enter.
+    </div>
+    <div class="age-btns">
+      <button class="age-btn-yes" onclick="ageVerify(true)">✓ I AM 18+</button>
+      <button class="age-btn-no" onclick="ageVerify(false)">✗ Under 18</button>
+    </div>
+    <div class="age-legal">
+      By entering you confirm you are of legal age in your jurisdiction and agree to our terms of service. Your age verification status is saved for 24 hours.
+    </div>
+  </div>
+</div>
