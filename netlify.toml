@@ -1,5 +1,5 @@
 [build]
-  command = "bash -lc 'go install github.com/saintedlama/cecil/cmd/cecil@latest && export PATH=\"$(go env GOPATH)/bin:$PATH\" && cecil build'"
+  command = "bash -lc 'export GOPROXY=https://proxy.golang.org,direct && go install github.com/saintedlama/cecil/cmd/cecil@latest && export PATH=\"$(go env GOPATH)/bin:$PATH\" && cecil build'"
   publish = "_site"
 
 [[redirects]]
