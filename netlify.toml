@@ -3,3 +3,13 @@
   to = "http://159.65.10.189:8651/:splat"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin/"
+  to = "/admin/index.html"
+  status = 200
