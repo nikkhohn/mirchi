@@ -1,3 +1,7 @@
+[build]
+  command = "bash -lc 'go install github.com/saintedlama/cecil/cmd/cecil@latest && export PATH=\"$(go env GOPATH)/bin:$PATH\" && cecil build'"
+  publish = "_site"
+
 [[redirects]]
   from = "/api/*"
   to = "http://159.65.10.189:8651/:splat"
