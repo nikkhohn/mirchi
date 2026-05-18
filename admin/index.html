@@ -1,23 +1,508 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a; --bg2: #111111; --bg3: #1a1a1a; --bg4: #222222;
+  --red: #e63329; --red2: #ff4438; --text: #e8e8e8; --muted: #666;
+  --border: #2a2a2a; --purple: #7c3aed;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+#login-screen { min-height: 100vh; display: flex; flex-direction: column; }
+.login-topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); }
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; }
+.logo span { color: var(--red); }
+.admin-badge { background: var(--red); color: white; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; margin-left: 10px; letter-spacing: 1px; }
+.back-link { font-size: 13px; color: var(--muted); text-decoration: none; }
+.back-link:hover { color: var(--text); }
+.login-body { flex: 1; display: flex; align-items: center; justify-content: center; }
+.login-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 16px; padding: 48px 52px; width: 440px; text-align: center; }
+.lock-icon { font-size: 42px; margin-bottom: 16px; display: block; }
+.login-card h2 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 3px; margin-bottom: 8px; color: white; }
+.login-card p { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+.pwd-input { width: 100%; background: var(--bg4); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 16px; color: var(--text); margin-bottom: 20px; outline: none; letter-spacing: 4px; text-align: center; font-family: 'Barlow', sans-serif; transition: border-color 0.2s; }
+.pwd-input:focus { border-color: var(--red); }
+.unlock-btn { width: 100%; background: var(--red); color: white; border: none; border-radius: 8px; padding: 14px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; cursor: pointer; transition: background 0.2s; }
+.unlock-btn:hover { background: var(--red2); }
+.error-msg { color: var(--red); font-size: 13px; margin-top: 12px; display: none; }
+#admin-panel { display: none; min-height: 100vh; flex-direction: column; }
+.panel-nav { display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); background: var(--bg2); position: sticky; top: 0; z-index: 100; }
+.nav-tab { display: flex; align-items: center; gap: 8px; padding: 16px 20px; font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; text-transform: uppercase; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; font-family: 'Barlow', sans-serif; }
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--red); border-bottom-color: var(--red); }
+.nav-right { margin-left: auto; }
+.logout-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'Barlow', sans-serif; }
+.logout-btn:hover { color: var(--red); border-color: var(--red); }
+.panel-content { padding: 32px 40px; flex: 1; max-width: 1100px; margin: 0 auto; width: 100%; }
+.section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.section-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--red); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.form-row.full { grid-template-columns: 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; }
+.req { color: var(--red); }
+.form-input, .form-textarea { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 13px 16px; font-size: 14px; color: var(--text); font-family: 'Barlow', sans-serif; outline: none; transition: border-color 0.2s; width: 100%; }
+.form-input::placeholder, .form-textarea::placeholder { color: #444; }
+.form-input:focus, .form-textarea:focus { border-color: var(--red); }
+.form-textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+.premium-box { background: #1a1330; border: 1px solid #3d2a7a; border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.premium-label { display: flex; align-items: center; gap: 10px; }
+.premium-label span { font-size: 13px; font-weight: 600; color: #a78bfa; letter-spacing: 1px; text-transform: uppercase; }
+.premium-label small { display: block; font-size: 12px; color: #6b5fa0; font-weight: 400; text-transform: none; letter-spacing: 0; margin-top: 2px; }
+.toggle-switch { width: 44px; height: 24px; background: var(--bg4); border-radius: 12px; border: 1px solid var(--border); cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+.toggle-switch.on { background: var(--purple); border-color: var(--purple); }
+.toggle-switch::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: left 0.2s; }
+.toggle-switch.on::after { left: 22px; }
+.streams-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+.streams-hint { font-size: 12px; color: #444; margin-bottom: 14px; }
+.stream-row { display: grid; grid-template-columns: 24px 1fr 200px 120px 32px; gap: 8px; align-items: center; margin-bottom: 10px; }
+.drag-handle { color: var(--muted); font-size: 16px; cursor: grab; text-align: center; }
+.remove-btn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px; border-radius: 4px; }
+.remove-btn:hover { color: var(--red); }
+.add-stream-btn { width: 100%; background: none; border: 1px dashed var(--red); border-radius: 8px; color: var(--red); padding: 12px; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
+.add-stream-btn:hover { background: rgba(230,51,41,0.08); }
+.submit-btn { background: var(--red); color: white; border: none; border-radius: 8px; padding: 14px 32px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+.submit-btn:hover { background: var(--red2); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.submit-btn.green { background: #16a34a; }
+.submit-btn.green:hover { background: #15803d; }
+.items-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.item-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
+.item-thumb { width: 60px; height: 44px; background: var(--bg4); border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; }
+.item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.item-info { flex: 1; min-width: 0; }
+.item-title { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.item-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+.badge-premium { background: #2d1f5e; color: #a78bfa; }
+.badge-free { background: #1a2e1a; color: #4ade80; }
+.badge-draft { background: #2a2a2a; color: #888; }
+.action-btn { background: var(--bg4); border: 1px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'Barlow', sans-serif; transition: all 0.15s; }
+.action-btn:hover { color: var(--text); }
+.action-btn.del:hover { color: var(--red); border-color: var(--red); }
+.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+.toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; opacity: 0; transform: translateY(8px); transition: all 0.3s; z-index: 999; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: #16a34a; color: white; }
+.toast.error { background: var(--red); color: white; }
+.empty { text-align: center; padding: 48px; color: var(--muted); font-size: 14px; }
+.empty .e-icon { font-size: 36px; margin-bottom: 12px; display: block; opacity: 0.4; }
+.loading { text-align: center; padding: 32px; color: var(--muted); font-size: 13px; }
+</style>
 </head>
 <body>
-  <script>
-    if (window.netlifyIdentity) {
-      window.netlifyIdentity.on("init", user => {
-        if (!user) {
-          window.netlifyIdentity.on("login", () => {
-            document.location.href = "/admin/";
-          });
-        }
-      });
-    }
-  </script>
-  <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>
+
+<div id="login-screen">
+  <div class="login-topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="logo">MIRCHI<span>.COM</span></div>
+      <span class="admin-badge">🔒 ADMIN</span>
+    </div>
+    <a href="/" class="back-link">🏠 Back to Site</a>
+  </div>
+  <div class="login-body">
+    <div class="login-card">
+      <span class="lock-icon">🔓</span>
+      <h2>ADMIN ACCESS</h2>
+      <p>Enter your admin password to manage content</p>
+      <input type="password" class="pwd-input" id="pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="unlock-btn" onclick="doLogin()">UNLOCK PANEL</button>
+      <div class="error-msg" id="err-msg">❌ Wrong password. Try again.</div>
+    </div>
+  </div>
+</div>
+
+<div id="admin-panel" style="display:none;flex-direction:column;">
+  <nav class="panel-nav">
+    <button class="nav-tab active" onclick="switchTab('videos',this)">🎬 VIDEOS</button>
+    <button class="nav-tab" onclick="switchTab('disklinks',this)">💾 DISK LINKS</button>
+    <button class="nav-tab" onclick="switchTab('promotions',this)">🔔 PROMOTIONS</button>
+    <button class="nav-tab" onclick="switchTab('posts',this)">📄 POSTS</button>
+    <div class="nav-right">
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="panel-content">
+
+    <!-- VIDEOS -->
+    <div id="tab-videos">
+      <div class="section-header"><span style="color:var(--red);font-size:20px">+</span><h2>ADD NEW VIDEO</h2></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">TITLE <span class="req">*</span></label><input class="form-input" id="v-title" placeholder="Video title..."></div>
+        <div class="form-group"><label class="form-label">DURATION</label><input class="form-input" id="v-duration" placeholder="1:23:45"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">THUMBNAIL URL <span class="req">*</span></label><input class="form-input" id="v-thumb" placeholder="https://.../thumbnail.jpg"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">DESCRIPTION (OPTIONAL)</label><textarea class="form-textarea" id="v-desc" placeholder="Short description..."></textarea></div>
+      </div>
+      <div class="premium-box">
+        <div class="premium-label">
+          <span style="font-size:18px">👑</span>
+          <div><span>PREMIUM ONLY</span><small>Hide from free users — only premium members can see this video</small></div>
+        </div>
+        <div class="toggle-switch" id="premium-toggle" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:20px">
+        <div class="streams-label">STREAMS / EPISODES <span class="req">*</span></div>
+        <div class="streams-hint">Add one or more streams. Each can be an MP4, HLS (.m3u8), YouTube or iframe URL.</div>
+        <div id="streams-container">
+          <div class="stream-row">
+            <span class="drag-handle">⠿</span>
+            <input class="form-input" placeholder="Stream URL (MP4/m3u8/YouTube...)">
+            <input class="form-input" placeholder="Label (e.g. Part 1)">
+            <input class="form-input" placeholder="Duration">
+            <button class="remove-btn" onclick="removeStream(this)">✕</button>
+          </div>
+        </div>
+        <button class="add-stream-btn" onclick="addStream()">+ ADD STREAM</button>
+      </div>
+      <button class="submit-btn" id="v-save-btn" onclick="saveVideo()">SAVE VIDEO</button>
+      <hr class="divider">
+      <div class="section-header"><h2>ALL VIDEOS</h2></div>
+      <div id="videos-list"><div class="loading">Loading...</div></div>
+    </div>
+
+    <!-- DISK LINKS -->
+    <div id="tab-disklinks" style="display:none">
+      <div class="section-header"><span style="color:var(--red);font-size:20px">+</span><h2>ADD DISK LINK</h2></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">TITLE <span class="req">*</span></label><input class="form-input" id="d-title" placeholder="Link title..."></div>
+        <div class="form-group"><label class="form-label">SIZE</label><input class="form-input" id="d-size" placeholder="e.g. 4.2 GB"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">DISK URL <span class="req">*</span></label><input class="form-input" id="d-url" placeholder="https://drive.google.com/..."></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">CATEGORY</label><input class="form-input" id="d-cat" placeholder="Movies, Series, Software..."></div>
+      </div>
+      <div class="premium-box">
+        <div class="premium-label">
+          <span style="font-size:18px">👑</span>
+          <div><span>PREMIUM ONLY</span><small>Only premium members can access this link</small></div>
+        </div>
+        <div class="toggle-switch" id="disk-premium" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <button class="submit-btn" id="d-save-btn" onclick="saveDisk()">SAVE DISK LINK</button>
+      <hr class="divider">
+      <div class="section-header"><h2>ALL DISK LINKS</h2></div>
+      <div id="disk-list"><div class="loading">Loading...</div></div>
+    </div>
+
+    <!-- PROMOTIONS -->
+    <div id="tab-promotions" style="display:none">
+      <div class="section-header"><span style="color:var(--red);font-size:20px">+</span><h2>ADD PROMOTION</h2></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">PROMO TITLE <span class="req">*</span></label><input class="form-input" id="p-title" placeholder="Promotion title..."></div>
+        <div class="form-group"><label class="form-label">TYPE</label><input class="form-input" id="p-type" placeholder="Banner, Popup, Announcement..."></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">MESSAGE <span class="req">*</span></label><textarea class="form-textarea" id="p-msg" placeholder="Promotion message..."></textarea></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">LINK URL</label><input class="form-input" id="p-url" placeholder="https://..."></div>
+        <div class="form-group"><label class="form-label">BUTTON TEXT</label><input class="form-input" id="p-btn" placeholder="e.g. Join Now"></div>
+      </div>
+      <button class="submit-btn" id="p-save-btn" onclick="savePromo()">SAVE PROMOTION</button>
+      <hr class="divider">
+      <div class="section-header"><h2>ACTIVE PROMOTIONS</h2></div>
+      <div id="promo-list"><div class="loading">Loading...</div></div>
+    </div>
+
+    <!-- POSTS -->
+    <div id="tab-posts" style="display:none">
+      <div class="section-header"><span style="color:var(--red);font-size:20px">+</span><h2>ADD NEW POST</h2></div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">POST TITLE <span class="req">*</span></label><input class="form-input" id="po-title" placeholder="Post title..."></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">CATEGORY</label><input class="form-input" id="po-cat" placeholder="News, Update, Blog..."></div>
+        <div class="form-group"><label class="form-label">THUMBNAIL URL</label><input class="form-input" id="po-thumb" placeholder="https://.../image.jpg"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">CONTENT <span class="req">*</span></label><textarea class="form-textarea" id="po-content" placeholder="Write your post content here..." style="min-height:160px"></textarea></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:4px">
+        <button class="submit-btn" id="po-draft-btn" onclick="savePost('draft')">SAVE DRAFT</button>
+        <button class="submit-btn green" id="po-pub-btn" onclick="savePost('published')">PUBLISH POST</button>
+      </div>
+      <hr class="divider">
+      <div class="section-header"><h2>ALL POSTS</h2></div>
+      <div id="posts-list"><div class="loading">Loading...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://gskxrltauljvfeoauhcu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdza3hybHRhdWxqdmZlb2F1aGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNjA2MzksImV4cCI6MjA5NDYzNjYzOX0.uKJKtUuXTUq1RaHUXqN_qQan6SkJRcNcaHKrl53fL_s';
+const ADMIN_PASSWORD = 'admin123';
+
+const headers = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Prefer': 'return=representation'
+};
+
+async function api(method, table, body, id) {
+  let url = `${SUPABASE_URL}/rest/v1/${table}`;
+  if (id) url += `?id=eq.${id}`;
+  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  if (!res.ok) throw new Error(await res.text());
+  return method === 'DELETE' ? true : res.json();
+}
+
+async function getAll(table) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?order=created_at.desc`, { headers });
+  return res.json();
+}
+
+function doLogin() {
+  const pwd = document.getElementById('pwd').value;
+  if (pwd === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    const panel = document.getElementById('admin-panel');
+    panel.style.display = 'flex';
+    loadAllData();
+  } else {
+    document.getElementById('err-msg').style.display = 'block';
+    document.getElementById('pwd').value = '';
+  }
+}
+
+function doLogout() {
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pwd').value = '';
+}
+
+function switchTab(name, btn) {
+  ['videos','disklinks','promotions','posts'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function addStream() {
+  const c = document.getElementById('streams-container');
+  const row = document.createElement('div');
+  row.className = 'stream-row';
+  row.innerHTML = `<span class="drag-handle">⠿</span>
+    <input class="form-input" placeholder="Stream URL (MP4/m3u8/YouTube...)">
+    <input class="form-input" placeholder="Label (e.g. Part 1)">
+    <input class="form-input" placeholder="Duration">
+    <button class="remove-btn" onclick="removeStream(this)">✕</button>`;
+  c.appendChild(row);
+}
+
+function removeStream(btn) {
+  if (document.querySelectorAll('.stream-row').length > 1) btn.closest('.stream-row').remove();
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function setBtnLoading(id, loading, text) {
+  const btn = document.getElementById(id);
+  btn.disabled = loading;
+  btn.textContent = loading ? 'SAVING...' : text;
+}
+
+async function saveVideo() {
+  const title = document.getElementById('v-title').value.trim();
+  if (!title) { showToast('❌ Title required!', 'error'); return; }
+  const streams = [];
+  document.querySelectorAll('.stream-row').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    if (inputs[0].value) streams.push({ url: inputs[0].value, label: inputs[1].value, duration: inputs[2].value });
+  });
+  setBtnLoading('v-save-btn', true, 'SAVE VIDEO');
+  try {
+    await api('POST', 'videos', {
+      title,
+      duration: document.getElementById('v-duration').value,
+      thumbnail: document.getElementById('v-thumb').value,
+      description: document.getElementById('v-desc').value,
+      premium: document.getElementById('premium-toggle').classList.contains('on'),
+      streams
+    });
+    showToast('✅ Video saved successfully!');
+    ['v-title','v-duration','v-thumb','v-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('premium-toggle').classList.remove('on');
+    document.getElementById('streams-container').innerHTML = `<div class="stream-row"><span class="drag-handle">⠿</span><input class="form-input" placeholder="Stream URL (MP4/m3u8/YouTube...)"><input class="form-input" placeholder="Label (e.g. Part 1)"><input class="form-input" placeholder="Duration"><button class="remove-btn" onclick="removeStream(this)">✕</button></div>`;
+    renderVideos();
+  } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+  setBtnLoading('v-save-btn', false, 'SAVE VIDEO');
+}
+
+async function saveDisk() {
+  const title = document.getElementById('d-title').value.trim();
+  if (!title) { showToast('❌ Title required!', 'error'); return; }
+  setBtnLoading('d-save-btn', true, 'SAVE DISK LINK');
+  try {
+    await api('POST', 'disk_links', {
+      title,
+      size: document.getElementById('d-size').value,
+      url: document.getElementById('d-url').value,
+      category: document.getElementById('d-cat').value,
+      premium: document.getElementById('disk-premium').classList.contains('on')
+    });
+    showToast('✅ Disk link saved!');
+    ['d-title','d-size','d-url','d-cat'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('disk-premium').classList.remove('on');
+    renderDisk();
+  } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+  setBtnLoading('d-save-btn', false, 'SAVE DISK LINK');
+}
+
+async function savePromo() {
+  const title = document.getElementById('p-title').value.trim();
+  if (!title) { showToast('❌ Title required!', 'error'); return; }
+  setBtnLoading('p-save-btn', true, 'SAVE PROMOTION');
+  try {
+    await api('POST', 'promotions', {
+      title,
+      type: document.getElementById('p-type').value,
+      message: document.getElementById('p-msg').value,
+      link_url: document.getElementById('p-url').value,
+      button_text: document.getElementById('p-btn').value
+    });
+    showToast('✅ Promotion saved!');
+    ['p-title','p-type','p-msg','p-url','p-btn'].forEach(id => document.getElementById(id).value = '');
+    renderPromos();
+  } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+  setBtnLoading('p-save-btn', false, 'SAVE PROMOTION');
+}
+
+async function savePost(status) {
+  const title = document.getElementById('po-title').value.trim();
+  if (!title) { showToast('❌ Title required!', 'error'); return; }
+  const btnId = status === 'published' ? 'po-pub-btn' : 'po-draft-btn';
+  setBtnLoading(btnId, true, status === 'published' ? 'PUBLISH POST' : 'SAVE DRAFT');
+  try {
+    await api('POST', 'posts', {
+      title,
+      category: document.getElementById('po-cat').value,
+      thumbnail: document.getElementById('po-thumb').value,
+      content: document.getElementById('po-content').value,
+      status
+    });
+    showToast(status === 'published' ? '✅ Post published!' : '✅ Draft saved!');
+    ['po-title','po-cat','po-thumb','po-content'].forEach(id => document.getElementById(id).value = '');
+    renderPosts();
+  } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+  setBtnLoading(btnId, false, status === 'published' ? 'PUBLISH POST' : 'SAVE DRAFT');
+}
+
+async function deleteItem(table, id, renderFn) {
+  if (!confirm('Delete this item?')) return;
+  try {
+    await api('DELETE', table, null, id);
+    showToast('🗑️ Deleted!');
+    renderFn();
+  } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+}
+
+async function renderVideos() {
+  const list = document.getElementById('videos-list');
+  list.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const videos = await getAll('videos');
+    if (!videos.length) { list.innerHTML = '<div class="empty"><span class="e-icon">🎬</span>No videos yet.</div>'; return; }
+    list.innerHTML = videos.map(v => `
+      <div class="item-card">
+        <div class="item-thumb">${v.thumbnail ? `<img src="${v.thumbnail}" onerror="this.parentElement.innerHTML='🎬'">` : '🎬'}</div>
+        <div class="item-info">
+          <div class="item-title">${v.title}</div>
+          <div class="item-meta">${v.duration||''} · ${v.streams?.length||0} stream(s) · ${new Date(v.created_at).toLocaleDateString('en-IN')}</div>
+        </div>
+        <span class="item-badge ${v.premium?'badge-premium':'badge-free'}">${v.premium?'👑 Premium':'Free'}</span>
+        <div style="display:flex;gap:8px">
+          <button class="action-btn del" onclick="deleteItem('videos',${v.id},renderVideos)">Delete</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { list.innerHTML = `<div class="empty">❌ Load failed: ${e.message}</div>`; }
+}
+
+async function renderDisk() {
+  const list = document.getElementById('disk-list');
+  list.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const links = await getAll('disk_links');
+    if (!links.length) { list.innerHTML = '<div class="empty"><span class="e-icon">💾</span>No disk links yet.</div>'; return; }
+    list.innerHTML = links.map(d => `
+      <div class="item-card">
+        <div class="item-thumb">💾</div>
+        <div class="item-info">
+          <div class="item-title">${d.title}</div>
+          <div class="item-meta">${d.category||'Uncategorized'} · ${d.size||''} · ${new Date(d.created_at).toLocaleDateString('en-IN')}</div>
+        </div>
+        <span class="item-badge ${d.premium?'badge-premium':'badge-free'}">${d.premium?'👑 Premium':'Free'}</span>
+        <div style="display:flex;gap:8px">
+          <button class="action-btn del" onclick="deleteItem('disk_links',${d.id},renderDisk)">Delete</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { list.innerHTML = `<div class="empty">❌ Load failed: ${e.message}</div>`; }
+}
+
+async function renderPromos() {
+  const list = document.getElementById('promo-list');
+  list.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const promos = await getAll('promotions');
+    if (!promos.length) { list.innerHTML = '<div class="empty"><span class="e-icon">🔔</span>No promotions yet.</div>'; return; }
+    list.innerHTML = promos.map(p => `
+      <div class="item-card">
+        <div class="item-thumb">🔔</div>
+        <div class="item-info">
+          <div class="item-title">${p.title}</div>
+          <div class="item-meta">${p.type||'General'} · ${new Date(p.created_at).toLocaleDateString('en-IN')}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="action-btn del" onclick="deleteItem('promotions',${p.id},renderPromos)">Delete</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { list.innerHTML = `<div class="empty">❌ Load failed: ${e.message}</div>`; }
+}
+
+async function renderPosts() {
+  const list = document.getElementById('posts-list');
+  list.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    const posts = await getAll('posts');
+    if (!posts.length) { list.innerHTML = '<div class="empty"><span class="e-icon">📄</span>No posts yet.</div>'; return; }
+    list.innerHTML = posts.map(p => `
+      <div class="item-card">
+        <div class="item-thumb">${p.thumbnail ? `<img src="${p.thumbnail}" onerror="this.parentElement.innerHTML='📄'">` : '📄'}</div>
+        <div class="item-info">
+          <div class="item-title">${p.title}</div>
+          <div class="item-meta">${p.category||'Uncategorized'} · ${new Date(p.created_at).toLocaleDateString('en-IN')}</div>
+        </div>
+        <span class="item-badge ${p.status==='published'?'badge-free':'badge-draft'}">${p.status==='published'?'✓ Published':'Draft'}</span>
+        <div style="display:flex;gap:8px">
+          <button class="action-btn del" onclick="deleteItem('posts',${p.id},renderPosts)">Delete</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { list.innerHTML = `<div class="empty">❌ Load failed: ${e.message}</div>`; }
+}
+
+function loadAllData() { renderVideos(); renderDisk(); renderPromos(); renderPosts(); }
+</script>
 </body>
 </html>
